@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<translate xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="10000"
+    android:fromYDelta="0"
+    android:interpolator="@anim/shake_5"
+    android:toYDelta="10" />
