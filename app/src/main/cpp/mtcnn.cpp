@@ -35,7 +35,7 @@ bool cmpArea(Bbox lsh, Bbox rsh) {
 }
 
 
-//MTCNN::MTCNN(){}
+//MTCNN1::MTCNN1(){}
 MTCNN::MTCNN(const string &model_path) {
 
 	std::vector<std::string> param_files = {
@@ -544,7 +544,7 @@ void MTCNN::detectMaxFace(ncnn::Mat& img_, std::vector<Bbox>& finalBbox) {
 #endif
 }
 
-//void MTCNN::detection(const cv::Mat& img, std::vector<cv::Rect>& rectangles){
+//void MTCNN1::detection(const cv::Mat& img, std::vector<cv::Rect>& rectangles){
 //    ncnn::Mat ncnn_img = ncnn::Mat::from_pixels(img.data, ncnn::Mat::PIXEL_BGR2RGB, img.cols, img.rows);
 //    std::vector<Bbox> finalBbox;
 //    detect(ncnn_img, finalBbox);

@@ -8,6 +8,7 @@
 #include "net.h"
 
 #include "mtcnn.h"
+
 using namespace std;
 #define TAG "MtcnnSo"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__)
@@ -21,7 +22,7 @@ extern "C" {
 
 JNIEXPORT jboolean JNICALL
 Java_com_test_testing_MTCNN_FaceDetectionModelInit(JNIEnv *env, jobject instance,
-                                                                 jstring faceDetectionModelPath_) {
+                                                   jstring faceDetectionModelPath_) {
     LOGD("JNI开始人脸检测模型初始化");
     //如果已初始化则直接返回
     if (detection_sdk_init_ok) {
@@ -63,9 +64,9 @@ Java_com_test_testing_MTCNN_FaceDetectionModelInit(JNIEnv *env, jobject instance
 
 JNIEXPORT jintArray JNICALL
 Java_com_test_testing_MTCNN_FaceDetect(JNIEnv *env, jobject instance,
-                                                     jbyteArray imageDate_,
-                                                     jint imageWidth, jint imageHeight,
-                                                     jint imageChannel) {
+                                       jbyteArray imageDate_,
+                                       jint imageWidth, jint imageHeight,
+                                       jint imageChannel) {
     //  LOGD("JNI开始检测人脸");
     if (!detection_sdk_init_ok) {
         LOGD("人脸检测MTCNN模型SDK未初始化，直接返回空");
@@ -146,9 +147,9 @@ Java_com_test_testing_MTCNN_FaceDetect(JNIEnv *env, jobject instance,
 
 JNIEXPORT jintArray JNICALL
 Java_com_test_testing_MTCNN_MaxFaceDetect(JNIEnv *env, jobject instance,
-                                                        jbyteArray imageDate_,
-                                                        jint imageWidth, jint imageHeight,
-                                                        jint imageChannel) {
+                                          jbyteArray imageDate_,
+                                          jint imageWidth, jint imageHeight,
+                                          jint imageChannel) {
     //  LOGD("JNI开始检测人脸");
     if (!detection_sdk_init_ok) {
         LOGD("人脸检测MTCNN模型SDK未初始化，直接返回空");
@@ -247,7 +248,7 @@ Java_com_test_testing_MTCNN_FaceDetectionModelUnInit(JNIEnv *env, jobject instan
 
 JNIEXPORT jboolean JNICALL
 Java_com_test_testing_MTCNN_SetMinFaceSize(JNIEnv *env, jobject instance,
-                                                         jint minSize) {
+                                           jint minSize) {
     if (!detection_sdk_init_ok) {
         LOGD("人脸检测MTCNN模型SDK未初始化，直接返回");
         return false;
@@ -255,9 +256,9 @@ Java_com_test_testing_MTCNN_SetMinFaceSize(JNIEnv *env, jobject instance,
 
     if (minSize <= 20) {
         minSize = 20;
-    } else if(minSize>130){
+    } else if (minSize > 130) {
 //        LOGD("greater then 130");
-    }else if(minSize<130){
+    } else if (minSize < 130) {
 //        LOGD("greater then 130");
     }
     mtcnn->SetMinFace(minSize);
@@ -267,9 +268,9 @@ Java_com_test_testing_MTCNN_SetMinFaceSize(JNIEnv *env, jobject instance,
 
 JNIEXPORT jboolean JNICALL
 Java_com_test_testing_MTCNN_SetThreadsNumber(JNIEnv *env, jobject instance,
-                                                           jint threadsNumber) {
+                                             jint threadsNumber) {
     if (!detection_sdk_init_ok) {
-        LOGD("Face detection MTCNN model SDK is not initialized, return directly");
+        LOGD("Face detection MTCNN1 model SDK is not initialized, return directly");
         return false;
     }
 
@@ -286,7 +287,7 @@ Java_com_test_testing_MTCNN_SetThreadsNumber(JNIEnv *env, jobject instance,
 JNIEXPORT jboolean JNICALL
 Java_com_test_testing_MTCNN_SetTimeCount(JNIEnv *env, jobject instance, jint timeCount) {
 
-    if(!detection_sdk_init_ok){
+    if (!detection_sdk_init_ok) {
         LOGD("人脸检测MTCNN模型SDK未初始化，直接返回");
         return false;
     }
@@ -295,5 +296,4 @@ Java_com_test_testing_MTCNN_SetTimeCount(JNIEnv *env, jobject instance, jint tim
     return true;
 
 }
-
 }
