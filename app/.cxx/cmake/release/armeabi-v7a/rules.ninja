@@ -42,7 +42,7 @@ rule CXX_SHARED_LIBRARY_LINKER__tensorflow_demo
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\Users\ankit\AppData\Local\Android\Sdk\cmake\3.6.4111459\bin\cmake.exe -HC:\Users\ankit\AndroidStudioProjects\tsas\tsas\app\src\main\jni -BC:\Users\ankit\AndroidStudioProjects\tsas\tsas\app\.cxx\cmake\release\armeabi-v7a
+  command = C:\Users\ankit\AppData\Local\Android\Sdk\cmake\3.6.4111459\bin\cmake.exe -HC:\Users\ankit\AndroidStudioProjects\tsas\tsas\app\src\main\cpp -BC:\Users\ankit\AndroidStudioProjects\tsas\tsas\app\.cxx\cmake\release\armeabi-v7a
   description = Re-running CMake...
   generator = 1
 

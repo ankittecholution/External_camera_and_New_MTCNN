@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/ankit/AndroidStudioProjects/tsas/tsas/app/src/main/jni
+# Install script for directory: C:/Users/ankit/AndroidStudioProjects/tsas/tsas/app/src/main/cpp
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

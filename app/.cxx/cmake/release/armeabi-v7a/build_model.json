@@ -9,7 +9,7 @@
       "intermediatesFolder": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\build\\intermediates",
       "gradleModulePathName": ":app",
       "moduleRootFolder": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app",
-      "makeFile": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\src\\main\\jni\\CMakeLists.txt",
+      "makeFile": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\src\\main\\cpp\\CMakeLists.txt",
       "buildSystem": "CMAKE",
       "compilerSettingsCacheFolder": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\.cxx",
       "cxxFolder": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\.cxx",
