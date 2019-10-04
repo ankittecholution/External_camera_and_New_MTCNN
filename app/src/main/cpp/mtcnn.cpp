@@ -543,14 +543,3 @@ void MTCNN::detectMaxFace(ncnn::Mat& img_, std::vector<Bbox>& finalBbox) {
 //    LOGD("Time cost:Max %.2fms,Min %.2fms,Avg %.2fms\n", max_time,min_time,total_time/count);
 #endif
 }
-
-//void MTCNN1::detection(const cv::Mat& img, std::vector<cv::Rect>& rectangles){
-//    ncnn::Mat ncnn_img = ncnn::Mat::from_pixels(img.data, ncnn::Mat::PIXEL_BGR2RGB, img.cols, img.rows);
-//    std::vector<Bbox> finalBbox;
-//    detect(ncnn_img, finalBbox);
-//    const int num_box = finalBbox.size();
-//    rectangles.resize(num_box);
-//    for(int i = 0; i < num_box; i++){
-//        rectangles[i] = cv::Rect(finalBbox[i].x1, finalBbox[i].y1, finalBbox[i].x2 - finalBbox[i].x1 + 1, finalBbox[i].y2 - finalBbox[i].y1 + 1);
-//    }
-//}
