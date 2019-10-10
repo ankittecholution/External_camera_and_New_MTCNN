@@ -1,17 +1,21 @@
 {
   "buildFiles": [
-    "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\src\\main\\cpp\\CMakeLists.txt",
-    "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\src\\main\\cpp\\tensorflow_demo\\CMakeLists.txt"
+    "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\CMakeLists.txt"
   ],
   "cleanCommands": [
     "C:\\Users\\ankit\\AppData\\Local\\Android\\Sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\.cxx\\cmake\\release\\armeabi-v7a --target clean"
   ],
   "libraries": {
-    "tensorflow_demo-Release-armeabi-v7a": {
-      "artifactName": "tensorflow_demo",
-      "buildCommand": "C:\\Users\\ankit\\AppData\\Local\\Android\\Sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\.cxx\\cmake\\release\\armeabi-v7a --target tensorflow_demo",
+    "mtcnn-Release-armeabi-v7a": {
+      "artifactName": "mtcnn",
+      "buildCommand": "C:\\Users\\ankit\\AppData\\Local\\Android\\Sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\.cxx\\cmake\\release\\armeabi-v7a --target mtcnn",
       "abi": "armeabi-v7a",
-      "output": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\build\\intermediates\\cmake\\release\\obj\\armeabi-v7a\\libtensorflow_demo.so"
+      "output": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\build\\intermediates\\cmake\\release\\obj\\armeabi-v7a\\libmtcnn.so"
+    },
+    "libncnn-Release-armeabi-v7a": {
+      "artifactName": "libncnn",
+      "abi": "armeabi-v7a",
+      "output": "C:\\Users\\ankit\\AndroidStudioProjects\\tsas\\tsas\\app\\src\\main\\jniLibs\\armeabi-v7a\\libncnn.a"
     }
   }
 }

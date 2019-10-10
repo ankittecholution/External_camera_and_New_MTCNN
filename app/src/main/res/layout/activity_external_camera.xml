@@ -7,11 +7,13 @@
 
     <com.serenegiant.usb.widget.UVCCameraTextureView
         android:id="@+id/externalCamera"
+        android:scaleX="-1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
     <com.test.testing.OverlayView
         android:id="@+id/tracking_overlay"
+        android:scaleX="-1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 

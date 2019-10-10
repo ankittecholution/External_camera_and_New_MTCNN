@@ -56,7 +56,7 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
 
     private static final int CROP_SIZE = 300;
 
-    private static final Size DESIRED_PREVIEW_SIZE = new Size(2448, 3264);
+    private static final Size DESIRED_PREVIEW_SIZE = new Size(1280, 720);
 
     private static final float TEXT_SIZE_DIP = 10;
     private static final int PERMISSIONS_REQUEST = 1;
@@ -543,14 +543,14 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
         log("Start onPreviewSizeChosen 2");
 
         rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
-        croppedBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
+        croppedBitmap = Bitmap.createBitmap(1280, 720, Bitmap.Config.ARGB_8888);
 
         log("Start onPreviewSizeChosen 3");
 
         frameToCropTransform =
                 ImageUtils.getTransformationMatrix(
                         previewWidth, previewHeight,
-                        320, 240,
+                        1280, 720,
                         0, false);
 
         cropToFrameTransform = new Matrix();

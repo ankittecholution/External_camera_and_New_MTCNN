@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/ankit/AndroidStudioProjects/tsas/tsas/app/src/main/cpp
+# Install script for directory: C:/Users/ankit/AndroidStudioProjects/tsas/tsas/app
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/TSAS")
+    set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Project")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -30,12 +30,6 @@ endif()
 # Install shared libraries without execute permission?
 if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
   set(CMAKE_INSTALL_SO_NO_EXE "0")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for each subdirectory.
-  include("C:/Users/ankit/AndroidStudioProjects/tsas/tsas/app/.cxx/cmake/release/armeabi-v7a/tensorflow_demo/cmake_install.cmake")
-
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)

@@ -107,24 +107,7 @@ public class MTCNN1 {
         }
         Trace.endSection(); // preprocessBitmap
 
-        // Copy the input data into TensorFlow.
-        Trace.beginSection("feed");
-        inferenceInterface.feed(inputName, floatValues, h, w, 3);
-        Trace.endSection();
 
-        // Run the inference call.
-        Trace.beginSection("run");
-        inferenceInterface.run(outputNames, false);
-        Trace.endSection();
-
-        // Copy the output Tensor back into the output array.
-        Trace.beginSection("fetch");
-        inferenceInterface.fetch(outputNames[0], outputProbs);
-        inferenceInterface.fetch(outputNames[2], outputBoxes);
-        Trace.endSection();
-
-        outputProbs.flip();
-        outputBoxes.flip();
 
         int len = outputProbs.remaining();
         Pair[] faces = new Pair[len];

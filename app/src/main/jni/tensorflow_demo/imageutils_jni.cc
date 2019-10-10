@@ -163,11 +163,3 @@ IMAGEUTILS_METHOD(convertRGB565ToYUV420SP)(
     env->ReleaseByteArrayElements(input, i, JNI_ABORT);
     env->ReleaseByteArrayElements(output, o, 0);
 }
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_test_testing_tracking_ObjectTracker_getTrackedPositionNative(JNIEnv *env, jobject thiz,
-                                                                      jstring key,
-                                                                      jfloatArray points) {
-    // TODO: implement getTrackedPositionNative()
-}

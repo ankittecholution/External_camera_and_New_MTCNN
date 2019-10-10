@@ -41,10 +41,10 @@ public class MultiBoxTracker {
 
     // Allow replacement of the tracked box with new results if
     // correlation has dropped below this level.
-    private static final float MARGINAL_CORRELATION = 0.90f;
+    private static final float MARGINAL_CORRELATION = 0.6f;
 
     // Consider object to be lost if correlation falls below this threshold.
-    private static final float MIN_CORRELATION = 0.3f;
+    private static final float MIN_CORRELATION = 0.2f;
 
     private static final int[] COLORS = {
             Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.CYAN, Color.MAGENTA, Color.WHITE,
@@ -134,7 +134,6 @@ public class MultiBoxTracker {
 
     public synchronized void draw(final Canvas canvas) {
 
-        Log.i("testing", "draw");
         final boolean rotated = sensorOrientation % 180 == 90;
         final float multiplier =
                 Math.min(canvas.getHeight() / (float) (rotated ? frameWidth : frameHeight),
@@ -166,7 +165,6 @@ public class MultiBoxTracker {
             borderedText.drawText(canvas, trackedPos.left + cornerSize, trackedPos.bottom, labelString);
         }
 
-        Log.i("testing", "draw2");
     }
 
     public synchronized void onFrame(
@@ -176,7 +174,6 @@ public class MultiBoxTracker {
             final int sensorOrienation,
             final byte[] frame,
             final long timestamp) {
-        Log.i("testing", "onFrame 1");
         if (objectTracker == null && !initialized) {
             ObjectTracker.clearInstance();
             objectTracker = ObjectTracker.getInstance(w, h, rowStride, true);
@@ -192,12 +189,10 @@ public class MultiBoxTracker {
                 Toast.makeText(context, message, Toast.LENGTH_LONG).show();
             }
         }
-        Log.i("testing", "onFrame 2");
 
         if (objectTracker == null) {
             return;
         }
-        Log.i("testing", "onFrame 3");
 
         objectTracker.nextFrame(frame, null, timestamp, null, true);
 
@@ -207,14 +202,14 @@ public class MultiBoxTracker {
         for (final TrackedRecognition recognition : copyList) {
             final ObjectTracker.TrackedObject trackedObject = recognition.trackedObject;
             final float correlation = trackedObject.getCurrentCorrelation();
+            Log.i("testingcolrrelation", correlation + "    " + recognition.time + "    " + recognition.color);
             if (correlation < MIN_CORRELATION) {
                 trackedObject.stopTracking();
                 trackedObjects.remove(recognition);
-
                 availableColors.add(recognition.color);
+                Log.i("testingcolrrelation", correlation + "  Stopped    " + recognition.time + "    " + recognition.color);
             }
         }
-        Log.i("testing", "onFrame 4");
     }
 
     private void processResults(
@@ -256,7 +251,6 @@ public class MultiBoxTracker {
                 trackedRecognition.title = potential.second.getTitle();
                 trackedRecognition.color = COLORS[trackedObjects.size()];
                 trackedObjects.add(trackedRecognition);
-
                 if (trackedObjects.size() >= COLORS.length) {
                     break;
                 }
@@ -275,8 +269,11 @@ public class MultiBoxTracker {
 
         final float potentialCorrelation = potentialObject.getCurrentCorrelation();
 
+        Log.i("testingcMARGINAL", potentialCorrelation + "");
+
         if (potentialCorrelation < MARGINAL_CORRELATION) {
             potentialObject.stopTracking();
+            Log.i("testingcMARGINAL", potentialCorrelation + "  " + "Stopped");
             return;
         }
 
@@ -338,7 +335,6 @@ public class MultiBoxTracker {
             }
             if (recogToReplace != null) {
                 removeList.add(recogToReplace);
-            } else {
             }
         }
 
@@ -374,5 +370,6 @@ public class MultiBoxTracker {
         float detectionConfidence;
         int color;
         String title;
+        long time;
     }
 }

@@ -19,12 +19,15 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.RectF;
+import android.os.Environment;
 import android.util.Log;
 
 import androidx.core.util.Pair;
 
 import com.test.testing.wrapper.MTCNN1;
 
+import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,8 +38,8 @@ public class Classifier {
     private static Classifier classifier;
     private MTCNN1 mtcnn;
 
-    private Classifier() {
-    }
+    int[] faceInfo;
+    private MTCNN newmtcnn = new MTCNN();
 
     static Classifier getInstance(AssetManager assetManager) {
         if (classifier != null) return classifier;
@@ -47,11 +50,43 @@ public class Classifier {
         return classifier;
     }
 
+    private Classifier() {
+        File sdDir = Environment.getExternalStorageDirectory();//Get the directory
+        String sdPath = sdDir.toString() + "/mtcnn1/";
+        newmtcnn.FaceDetectionModelInit(sdPath);
+
+        newmtcnn.SetMinFaceSize(150);
+        newmtcnn.SetThreadsNumber(1);
+        newmtcnn.SetTimeCount(1);
+    }
+
+    private byte[] getPixelsRGBA(Bitmap image) {
+        // calculate how many bytes our image consists of
+        int bytes = image.getByteCount();
+        ByteBuffer buffer = ByteBuffer.allocate(bytes); // Create a new buffer
+        image.copyPixelsToBuffer(buffer); // Move the byte data to the buffer
+        byte[] temp = buffer.array(); // Get the underlying array containing the
+        return temp;
+    }
+
     List<Recognition> recognizeImage(Bitmap bitmap, Matrix matrix) {
         synchronized (this) {
             long time = System.currentTimeMillis();
-            Pair[] faces = mtcnn.detect(bitmap);
-            Log.i("mtcnn time", "" + (System.currentTimeMillis() - time) + "  " + faces.length);
+//            Pair[] faces = mtcnn.detect(bitmap);
+
+
+            byte[] b = getPixelsRGBA(bitmap);
+
+            faceInfo = newmtcnn.FaceDetect(b, bitmap.getWidth(), bitmap.getHeight(), 4);
+            Pair[] faces = new Pair[faceInfo[0]];
+
+            for (int i = 0; i < faceInfo[0]; i++) {
+                faces[i] = new Pair<>(
+                        new RectF(faceInfo[1 + 14 * i], faceInfo[2 + 14 * i], faceInfo[3 + 14 * i], faceInfo[4 + 14 * i]), 12.5f);
+            }
+
+
+            Log.i("mtcnn time", "" + (System.currentTimeMillis() - time) + "  " + faceInfo[0]);
 
             final List<Recognition> mappedRecognitions = new LinkedList<>();
 
