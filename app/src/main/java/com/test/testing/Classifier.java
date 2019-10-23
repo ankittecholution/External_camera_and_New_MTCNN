@@ -15,16 +15,14 @@ limitations under the License.
 
 package com.test.testing;
 
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Environment;
-import android.util.Log;
 
 import androidx.core.util.Pair;
 
-import com.test.testing.wrapper.MTCNN1;
+import org.json.JSONArray;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -35,26 +33,14 @@ import java.util.List;
  * Generic interface for interacting with different recognition engines.
  */
 public class Classifier {
-    private static Classifier classifier;
-    private MTCNN1 mtcnn;
 
     int[] faceInfo;
     private MTCNN newmtcnn = new MTCNN();
 
-    static Classifier getInstance(AssetManager assetManager) {
-        if (classifier != null) return classifier;
-
-        classifier = new Classifier();
-
-        classifier.mtcnn = MTCNN1.create(assetManager);
-        return classifier;
-    }
-
-    private Classifier() {
+    public Classifier() {
         File sdDir = Environment.getExternalStorageDirectory();//Get the directory
         String sdPath = sdDir.toString() + "/mtcnn1/";
         newmtcnn.FaceDetectionModelInit(sdPath);
-
         newmtcnn.SetMinFaceSize(150);
         newmtcnn.SetThreadsNumber(1);
         newmtcnn.SetTimeCount(1);
@@ -71,38 +57,51 @@ public class Classifier {
 
     List<Recognition> recognizeImage(Bitmap bitmap, Matrix matrix) {
         synchronized (this) {
+            JSONArray landIDK = new JSONArray();
+            JSONArray recIDK = new JSONArray();
+            JSONArray poseIDK = new JSONArray();
             long time = System.currentTimeMillis();
-//            Pair[] faces = mtcnn.detect(bitmap);
-
 
             byte[] b = getPixelsRGBA(bitmap);
-
             faceInfo = newmtcnn.FaceDetect(b, bitmap.getWidth(), bitmap.getHeight(), 4);
             Pair[] faces = new Pair[faceInfo[0]];
+
+            JSONArray landmark = new JSONArray();
+
+            final List<Recognition> mappedRecognitions = new LinkedList<>();
+
 
             for (int i = 0; i < faceInfo[0]; i++) {
                 faces[i] = new Pair<>(
                         new RectF(faceInfo[1 + 14 * i], faceInfo[2 + 14 * i], faceInfo[3 + 14 * i], faceInfo[4 + 14 * i]), 12.5f);
-            }
-
-
-            Log.i("mtcnn time", "" + (System.currentTimeMillis() - time) + "  " + faceInfo[0]);
-
-            final List<Recognition> mappedRecognitions = new LinkedList<>();
-
-            for (Pair face : faces) {
+                JSONArray recArr = new JSONArray();
+                recArr.put(faceInfo[1 + 14 * i]);
+                recArr.put(faceInfo[2 + 14 * i]);
+                recArr.put(faceInfo[3 + 14 * i] - faceInfo[1 + 14 * i] + 1);
+                recArr.put(faceInfo[4 + 14 * i] - faceInfo[2 + 14 * i] + 1);
+                recIDK.put(recArr);
+                JSONArray landArray = new JSONArray();
+                landArray.put(faceInfo[5 + 14 * i]);
+                landArray.put(faceInfo[6 + 14 * i]);
+                landArray.put(faceInfo[7 + 14 * i]);
+                landArray.put(faceInfo[8 + 14 * i]);
+                landArray.put(faceInfo[9 + 14 * i]);
+                landArray.put(faceInfo[10 + 14 * i]);
+                landArray.put(faceInfo[11 + 14 * i]);
+                landArray.put(faceInfo[12 + 14 * i]);
+                landArray.put(faceInfo[13 + 14 * i]);
+                landArray.put(faceInfo[14 + 14 * i]);
+//                Log.i("rectTesting_recognize", "" + (faceInfo[1 + 14 * i]+ " "+faceInfo[2 + 14 * i]+ "  " +faceInfo[3 + 14 * i]+" " + faceInfo[4 + 14 * i])+"   tiime "+System.currentTimeMillis());
+                Pair face = faces[i];
                 RectF rectF = (RectF) face.first;
-
-//                Rect rect = new Rect();
-//                rectF.round(rect);
 
                 matrix.mapRect(rectF);
                 Float prob = (Float) face.second;
                 String name;
-                name = "Unknown";
+                name = "";
 
                 Recognition result =
-                        new Recognition("" + face.second, name, prob, rectF);
+                        new Recognition("" + face.second, name, prob, recArr, landArray, rectF, face.toString());
                 mappedRecognitions.add(result);
             }
             return mappedRecognitions;
@@ -110,9 +109,6 @@ public class Classifier {
 
     }
 
-    void close() {
-        mtcnn.close();
-    }
 
     /**
      * An immutable result returned by a Classifier describing what was recognized.
@@ -139,12 +135,21 @@ public class Classifier {
          */
         private RectF location;
 
+        JSONArray recArr;
+
+        JSONArray landArray;
+
+        private String json;
+
         Recognition(
-                final String id, final String title, final Float confidence, final RectF location) {
+                final String id, final String title, final Float confidence, final JSONArray recArr, final JSONArray landArr, final RectF location, final String json) {
             this.id = id;
             this.title = title;
             this.confidence = confidence;
             this.location = location;
+            this.recArr = recArr;
+            this.landArray = landArr;
+            this.json = json;
         }
 
         public String getId() {
@@ -160,7 +165,19 @@ public class Classifier {
         }
 
         public RectF getLocation() {
-            return new RectF(location);
+            return location;
+        }
+
+        public JSONArray getRecArr() {
+            return recArr;
+        }
+
+        public JSONArray getLandArray() {
+            return landArray;
+        }
+
+        public String getLandmark() {
+            return json;
         }
 
 

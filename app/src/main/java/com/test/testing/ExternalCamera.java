@@ -1,13 +1,11 @@
 package com.test.testing;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
-import android.graphics.YuvImage;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,18 +17,14 @@ import android.util.Size;
 import android.util.TypedValue;
 import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.snackbar.Snackbar;
 import com.jiangdg.usbcamera.UVCCameraHelper;
 import com.serenegiant.usb.CameraDialog;
 import com.serenegiant.usb.USBMonitor;
@@ -41,7 +35,8 @@ import com.test.testing.env.BorderedText;
 import com.test.testing.env.ImageUtils;
 import com.test.testing.tracking.MultiBoxTracker;
 
-import java.io.ByteArrayOutputStream;
+import org.json.JSONException;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,37 +49,21 @@ import butterknife.ButterKnife;
 public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper.OnMyDevConnectListener, CameraDialog.CameraDialogParent, CameraViewInterface.Callback, AbstractUVCCameraHandler.OnPreViewResultListener {
 
 
-    private static final int CROP_SIZE = 300;
-
-    private static final Size DESIRED_PREVIEW_SIZE = new Size(1280, 720);
 
     private static final float TEXT_SIZE_DIP = 10;
-    private static final int PERMISSIONS_REQUEST = 1;
-    private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
     public ImageView i;
     protected int previewWidth = 0;
     protected int previewHeight = 0;
-    protected TextView frameValueTextView, cropValueTextView, inferenceTimeTextView;
-    protected ImageView bottomSheetArrowImageView;
     OverlayView trackingOverlay;
     private Classifier classifier;
-    private boolean debug = false;
     private Handler handler;
     private HandlerThread handlerThread;
-    private boolean useCamera2API;
     private boolean isProcessingFrame = false;
     private byte[][] yuvBytes = new byte[3][];
     private int[] rgbBytes = null;
     private int yRowStride;
     private Runnable postInferenceCallback;
     private Runnable imageConverter;
-    private LinearLayout bottomSheetLayout;
-    private LinearLayout gestureLayout;
-    private BottomSheetBehavior sheetBehavior;
-    private ImageView plusImageView, minusImageView;
-    private SwitchCompat apiSwitchCompat;
-    private TextView threadsTextView;
-    private Integer sensorOrientation;
     private Bitmap rgbFrameBitmap = null;
     private Bitmap croppedBitmap = null;
     private boolean computingDetection = false;
@@ -94,39 +73,21 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
     private MultiBoxTracker tracker;
     private byte[] luminanceCopy;
     private BorderedText borderedText;
-    private Snackbar initSnackbar;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
 
     @BindView(R.id.externalCamera)
     public View textureViewUsb;
-    private boolean initialized = false;
 
     String TAG = "External_cam_testing";
 
-    boolean runnimg = true;
-
-    YuvImage yuv;
-    ByteArrayOutputStream out;
-    int width;
-    int height;
     private boolean isRequest;
     private boolean isPreview;
-    byte[] bytes1;
     private UVCCameraHelper mCameraHelper;
     private CameraViewInterface mUVCCameraView;
     private static String[] PERMISSIONS_STORAGE = {
             "android.permission.READ_EXTERNAL_STORAGE",
             "android.permission.WRITE_EXTERNAL_STORAGE"};
-//    private MTCNN newmtcnn = new MTCNN();
-
-
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-//        super.onSaveInstanceState(outState, outPersistentState);
-//        isOnSavedInstanceCalled = true;
-//    }
 
     public static void verifyStoragePermissions(Activity activity) {
 
@@ -156,6 +117,8 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_external_camera);
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         ButterKnife.bind(this);
 
         verifyStoragePermissions(this);
@@ -172,20 +135,10 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
         }
         //Model initialization
         init();
-        File sdDir = Environment.getExternalStorageDirectory();//Get the directory
-        String sdPath = sdDir.toString() + "/mtcnn1/";
-//        newmtcnn.FaceDetectionModelInit(sdPath);
-//
-//        newmtcnn.SetMinFaceSize(150);
-//        newmtcnn.SetThreadsNumber(1);
-//        newmtcnn.SetTimeCount(1);
 
         mCameraHelper.setOnPreviewFrameListener(this);
 
 //
-//        if (isExternalCam)
-//        else
-//            switchFragment(externalCamFragment,internalCameraFragment,INTERNAL_CAM_FRAG);
     }
 
     @Override
@@ -354,21 +307,11 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
         yRowStride = previewWidth;
 
         imageConverter =
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        ImageUtils.convertYUV420SPToARGB8888(bytes, previewWidth, previewHeight, rgbBytes);
-                    }
-                };
+                () -> ImageUtils.convertYUV420SPToARGB8888(bytes, previewWidth, previewHeight, rgbBytes);
         log("Start onPreviewResult 2");
 
         postInferenceCallback =
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        isProcessingFrame = false;
-                    }
-                };
+                () -> isProcessingFrame = false;
         log("Start onPreviewResult 3");
         processImage();
     }
@@ -393,11 +336,8 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
     }
 
     protected synchronized void runInBackground(final Runnable r) {
-        Log.i("testing", "runInBackground 1");
         if (handler != null) {
-            Log.i("testing", "runInBackground 2");
             handler.post(r);
-            Log.i("testing", "runInBackground 3");
         }
     }
 
@@ -406,7 +346,16 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
         final long currTimestamp = timestamp;
         byte[] originalLuminance = getLuminance();
         log("Start processImage 1");
+
+//        rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                i.setImageBitmap(rgbFrameBitmap);
+//            }
+//        });
         tracker.onFrame(
+                rgbFrameBitmap,
                 previewWidth,
                 previewHeight,
                 getLuminanceStride(),
@@ -450,18 +399,22 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
 
                             log("Start processImage 5");
                             final long startTime = SystemClock.uptimeMillis();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    i.setImageBitmap(croppedBitmap);
-                                }
-                            });
+//                            runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    i.setImageBitmap(croppedBitmap);
+//                                }
+//                            });
                             List<Classifier.Recognition> mappedRecognitions =
                                     classifier.recognizeImage(croppedBitmap, cropToFrameTransform);
 
                             log("Start processImage 7");
 
-                            tracker.trackResults(mappedRecognitions, luminanceCopy, currTimestamp);
+                            try {
+                                tracker.trackResults(mappedRecognitions, luminanceCopy, currTimestamp);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                             trackingOverlay.postInvalidate();
                             computingDetection = false;
 
@@ -505,11 +458,8 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
 
     }
     private void init(){
-        try {
-            classifier = Classifier.getInstance(getAssets());
-        } catch (Exception e) {
-            finish();
-        }
+
+        classifier = new Classifier();
         mUVCCameraView = (CameraViewInterface) textureViewUsb;
         mUVCCameraView.setCallback(this);
         mCameraHelper = UVCCameraHelper.getInstance();
@@ -517,7 +467,7 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
         mCameraHelper.initUSBMonitor(this, mUVCCameraView, this);
         mCameraHelper.updateResolution(1280,720 );
         if (mCameraHelper != null && mCameraHelper.isCameraOpened())
-            mCameraHelper.setModelValue(UVCCameraHelper.MODE_BRIGHTNESS, 70);
+            mCameraHelper.setModelValue(UVCCameraHelper.MODE_BRIGHTNESS, 100);
 
     }
     public void displayToast(String message){
@@ -569,113 +519,5 @@ public class ExternalCamera extends AppCompatActivity implements UVCCameraHelper
 
         log("Start onPreviewSizeChosen 6");
     }
-
-
-//    private class FaceDetection extends AsyncTask<byte[], Integer, JSONObject> {
-//
-////        MTCNN mtcnn;
-//        JSONObject face;
-//        int[] faceInfo;
-//        Bitmap bitmap;
-//        JSONArray recIDK;
-//
-//        int width, height;
-//
-//        FaceDetection(MTCNN mtcnn, int width, int height) {
-//            this.mtcnn = mtcnn;
-//            this.width = width;
-//            this.height = height;
-//        }
-//
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//            runnimg = false;
-//
-//        }
-//
-//        private byte[] getPixelsRGBA(Bitmap image) {
-//            // calculate how many bytes our image consists of
-//            int bytes = image.getByteCount();
-//            ByteBuffer buffer = ByteBuffer.allocate(bytes); // Create a new buffer
-//            image.copyPixelsToBuffer(buffer); // Move the byte data to the buffer
-//            byte[] temp = buffer.array(); // Get the underlying array containing the
-//            return temp;
-//        }
-//
-//
-//
-//        @Override
-//        protected JSONObject doInBackground(byte[]... bitmaps) {
-//            JSONObject done = new JSONObject();
-//            face = new JSONObject();
-//            JSONArray landIDK = new JSONArray();
-//            recIDK = new JSONArray();
-//            JSONArray poseIDK = new JSONArray();
-//            bitmap = BitmapFactory.decodeByteArray(bitmaps[0], 0, bitmaps[0].length);
-//            byte[] b = getPixelsRGBA(bitmap);
-//            try {
-//                long ti = System.currentTimeMillis();
-//                faceInfo = mtcnn.FaceDetect(b, width, height, 4);
-//                Log.i(TAG, (System.currentTimeMillis() - ti) + " " + faceInfo[0]);
-//                if (faceInfo[0]>0) {
-//                    for (int i = 0; i < faceInfo[0]; i++) {
-//                        JSONArray recArr = new JSONArray();
-//                        recArr.put(faceInfo[1 + 14 * i]);
-//                        recArr.put(faceInfo[2 + 14 * i]);
-//                        recArr.put(faceInfo[3 + 14 * i] - faceInfo[1 + 14 * i] + 1);
-//                        recArr.put(faceInfo[4 + 14 * i] - faceInfo[2 + 14 * i] + 1);
-//                        recIDK.put(recArr);
-//                        JSONArray landArray = new JSONArray();
-//                        landArray.put(faceInfo[5 + 14 * i]);
-//                        landArray.put(faceInfo[6 + 14 * i]);
-//                        landArray.put(faceInfo[7 + 14 * i]);
-//                        landArray.put(faceInfo[8 + 14 * i]);
-//                        landArray.put(faceInfo[9 + 14 * i]);
-//                        landArray.put(faceInfo[10 + 14 * i]);
-//                        landArray.put(faceInfo[11 + 14 * i]);
-//                        landArray.put(faceInfo[12 + 14 * i]);
-//                        landArray.put(faceInfo[13 + 14 * i]);
-//                        landArray.put(faceInfo[14 + 14 * i]);
-//                        landIDK.put(landArray);
-//                        String s = getPose(i);
-//                        Log.i("Pose", getPose(i));
-//                        poseIDK.put(s);
-//                    }
-//                    face.put("rects", recIDK);
-//                    face.put("landmarks", landIDK);
-//                    face.put("face_pose", poseIDK);
-//                    done.put("faces", face.toString());
-//                }
-//            } catch (Exception e) {
-//                Log.e("Error Face Detection", "[*]detect false:" + e);
-//            }
-//            return done;
-//        }
-//
-//
-//
-//        @Override
-//        protected void onPostExecute(JSONObject done) {
-//            if (faceInfo[0]>0)
-//                Log.i(TAG,done.toString());
-//            runnimg = true;
-//        }
-//
-//        private String getPose(int i) {
-//            int right = abs(faceInfo[6 + 14 * i] - faceInfo[7 + 14 * i]), left = abs(faceInfo[5 + 14 * i] - faceInfo[7 + 14 * i]);
-//            if (right==0)
-//                right = 1;
-//            if (left==0)
-//                left = 1;
-//
-//            if (abs(faceInfo[5 + 14 * i] - faceInfo[7 + 14 * i]) / right > 4)
-//                return "left";
-//            else if (abs(faceInfo[6 + 14 * i] - faceInfo[7 + 14 * i]) / left > 4)
-//                return "right";
-//            else
-//                return "center";
-//        }
-//    }
 
 }
